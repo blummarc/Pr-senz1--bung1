@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelmanipulation auf dem Canvas</title>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <label for="rasterSize">Rastergröße:</label>
+    <input type="range" id="rasterSize" min="1" max="20" value="1">
+
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var img = new Image();
+        img.src = 'colored.jpg';
+        var originalImage; // Variable zum Speichern des Originalbildes
+
+        img.onload = function () {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height); // Originalbild speichern
+            applyRasterFilter(1); // Initial mit Rastergröße 1
+
+            document.getElementById('rasterSize').addEventListener('input', function () {
+                var newSize = parseInt(this.value, 10);
+                applyRasterFilter(newSize);
+            });
+
+            document.getElementById('rasterSize').addEventListener('change', function () {
+                // Wenn der Schieberegler zurückgesetzt wird, das Originalbild wiederherstellen
+                if (this.value == this.min) {
+                    ctx.putImageData(originalImage, 0, 0);
+                }
+            });
+        };
+
+        function applyRasterFilter(rasterSize) {
+            var imgData = originalImage; // Verwenden Sie das Originalbild
+
+            for (var x = 0; x < imgData.width; x++) {
+                for (var y = 0; y < imgData.height; y++) {
+
+                    var rasterX = ((x / rasterSize) | 0) * rasterSize;
+                    var rasterY = ((y / rasterSize) | 0) * rasterSize;
+
+                    var rasterValIndex = (rasterX + rasterY * imgData.width) * 4;
+
+                    var r = imgData.data[rasterValIndex];
+                    var g = imgData.data[rasterValIndex + 1];
+                    var b = imgData.data[rasterValIndex + 2];
+                    var a = imgData.data[rasterValIndex + 3];
+
+                    // Hier können Sie die Pixel setzen in x, y
+                    ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a / 255) + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
